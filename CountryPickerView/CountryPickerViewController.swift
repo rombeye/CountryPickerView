@@ -30,6 +30,10 @@ public class CountryPickerViewController: UITableViewController {
     
     fileprivate var dataSource: CountryPickerViewDataSourceInternal!
     
+    public var searchBarPlaceholderText: String = ""
+      public var searchBarTextAttributes: [String:Any] = [:]
+      public var searchBarPlaceholderTextAttributes: [String:Any] = [:]
+    
     override public func viewDidLoad() {
         super.viewDidLoad()
         

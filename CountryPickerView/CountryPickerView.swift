@@ -25,6 +25,13 @@ public struct Country: Equatable {
         return UIImage(named: "CountryPickerView.bundle/Images/\(code.uppercased())",
             in: Bundle(for: CountryPickerView.self), compatibleWith: nil)!
     }
+     // @AlphaApps changed accessibility from `internal` to `public`
+    public init(name: String, code: String, phoneCode: String) {
+         self.name = name
+         self.code = code
+         self.phoneCode = phoneCode
+     }
+     // !AlphaApps
 }
 
 public func ==(lhs: Country, rhs: Country) -> Bool {
@@ -81,7 +88,13 @@ public class CountryPickerView: NibView {
     public var textColor = UIColor.black {
         didSet { setup() }
     }
-    
+    // @AlphaApps
+    public var customBackgroundColor = UIColor.clear
+    public var defaultCountry = Country(name: "United Arab Emirates", code: "AE", phoneCode: "+971")
+    public var searchBarPlaceholderText: String = ""
+    public var searchBarTextAttributes: [String:Any] = [:]
+    public var searchBarPlaceholderTextAttributes: [String:Any] = [:]
+    // !AlphaApps
     /// The spacing between the flag image and the text.
     public var flagSpacingInView: CGFloat {
         get {
@@ -99,9 +112,14 @@ public class CountryPickerView: NibView {
     fileprivate var _selectedCountry: Country?
     internal(set) public var selectedCountry: Country {
         get {
-            return _selectedCountry
-                ?? countries.first(where: { $0.code == Locale.current.regionCode })
-                ?? countries.first!
+            // @AlphaApps unnecessary lookups, we just need selected country or default country
+                    return _selectedCountry ?? defaultCountry
+                    /*
+                    return _selectedCountry
+                        ?? countries.first(where: { $0.code == Locale.current.regionCode })
+                        ?? countries.first(where: { $0.code == "NG" })!
+                    */
+                    // !AlphaApps
         }
         set {
             _selectedCountry = newValue
@@ -152,8 +170,19 @@ public class CountryPickerView: NibView {
     }
     
     public func showCountriesList(from viewController: UIViewController) {
-        let countryVc = CountryPickerViewController(style: .grouped)
+              // @AlphaApps: original UITableView style is: .grouped
+        //let countryVc = CountryPickerViewController(style: .grouped)
+        let countryVc = CountryPickerViewController(style: .plain)
+        // !AlphaApps
         countryVc.countryPickerView = self
+        // @AlphaApps VERY IMPORTANT -- reloadData to apply our custom dataSource and delegate since without this the default internalDataSource implementation is applied!
+        countryVc.tableView.reloadData()
+        // !AlphaApps
+        // @AlphaApps assign text attributes
+        countryVc.searchBarPlaceholderText = self.searchBarPlaceholderText
+        countryVc.searchBarTextAttributes = self.searchBarTextAttributes
+        countryVc.searchBarPlaceholderTextAttributes = self.searchBarPlaceholderTextAttributes
+        // !AlphaApps
         if let viewController = viewController as? UINavigationController {
             delegate?.countryPickerView(self, willShow: countryVc)
             viewController.pushViewController(countryVc, animated: true) {
